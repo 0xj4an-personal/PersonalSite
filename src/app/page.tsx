@@ -1,8 +1,7 @@
 'use client'
 
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Stars, Text, Html, Sphere } from '@react-three/drei'
-import { motion } from 'framer-motion'
+import { OrbitControls, Stars } from '@react-three/drei'
 import { useState, useRef } from 'react'
 import * as THREE from 'three'
 import About from '@/components/About'
@@ -21,7 +20,7 @@ export interface Section {
   color: string
   scale: number
   id: string
-  Component?: React.ComponentType<{}>
+  Component?: React.ComponentType<object>
   gradient: string
 }
 
@@ -74,23 +73,6 @@ const sections: Section[] = [
   }
 ]
 
-interface ActiveSection {
-  isOpen: boolean
-  section: Section | null
-}
-
-interface SectionProps {
-  name: string;
-  position: [number, number, number];
-  color: string;
-  scale: number;
-  id: string;
-  Component?: React.ComponentType<{}>;
-  gradient: string;
-  onSectionClick: (section: Section) => void;
-  isModalOpen: boolean;
-}
-
 function Scene({ onSectionClick, isModalOpen }: { onSectionClick: (section: Section) => void, isModalOpen: boolean }) {
   const floatingElements = [
     { position: [35, 20, -2] as [number, number, number], rotation: [0.5, 0.5, 0] as [number, number, number], scale: 1.5 },
@@ -114,14 +96,13 @@ function Scene({ onSectionClick, isModalOpen }: { onSectionClick: (section: Sect
     { position: [-5, 5, -15] as [number, number, number], velocity: [0.4, 0.1, 0.5] as [number, number, number], size: 0.18, color: '#bdbdbd' },
   ];
 
-  const zeroXj4anRef = useRef<THREE.Group>(null); // Ref for the 0xj4an element
+  const zeroXj4anRef = useRef<THREE.Mesh>(null)
 
   useFrame((state, delta) => {
-    // Test animation for 0xj4an element
     if (zeroXj4anRef.current) {
-      zeroXj4anRef.current.rotation.y += delta * 0.5; // Rotate slowly
+      zeroXj4anRef.current.rotation.y += delta * 0.5
     }
-  });
+  })
 
   return (
     <>
@@ -131,31 +112,28 @@ function Scene({ onSectionClick, isModalOpen }: { onSectionClick: (section: Sect
       <pointLight position={[-10, -10, -10]} intensity={0.2} />
       <fog attach="fog" args={['#000', 20, 40]} />
       
-      {/* Add floating elements */}
       {floatingElements.map((element, index) => (
         <FloatingElement key={index} {...element} />
       ))}
 
-      {/* Add comets */}
       {comets.map((comet, index) => (
         <Comet key={index} {...comet} />
       ))}
 
-      {sections.map((section, i) => (
+      {sections.map((section) => (
         <Section 
           key={section.name} 
           {...section} 
           onSectionClick={onSectionClick} 
           isModalOpen={isModalOpen} 
           gradient={section.gradient} 
-          ref={section.id === 'home' ? zeroXj4anRef : undefined} // Attach ref to 0xj4an
+          ref={section.id === 'home' ? zeroXj4anRef : undefined}
         />
       ))}
       
-      {/* Draw lines between consecutive elements */}
       {sections.slice(0, -1).map((section, i) => {
-        const target = sections[i + 1];
-        if (!target) return null;
+        const target = sections[i + 1]
+        if (!target) return null
 
         return (
           <line key={`${section.id}-${target.id}`}>
@@ -179,7 +157,7 @@ function Scene({ onSectionClick, isModalOpen }: { onSectionClick: (section: Sect
               linewidth={1}
             />
           </line>
-        );
+        )
       })}
     </>
   )
@@ -192,7 +170,7 @@ export default function Home() {
   })
 
   const handleSectionClick = (section: Section) => {
-    if (!section.Component) return // Don't open modal for knowledge elements
+    if (!section.Component) return
     setActiveSection({ isOpen: true, section })
   }
 

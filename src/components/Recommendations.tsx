@@ -35,7 +35,7 @@ export default function Recommendations() {
               className="overflow-hidden rounded-lg bg-gray-900 p-8"
             >
               <div className="flex flex-col gap-4">
-                <p className="text-lg text-gray-300 italic">"{rec.text}"</p>
+                <p className="text-lg text-gray-300 italic">&quot;{rec.text}&quot;</p>
                 <div className="mt-4">
                   <p className="font-semibold text-white">{rec.author}</p>
                   <p className="text-gray-400">{rec.title}</p>

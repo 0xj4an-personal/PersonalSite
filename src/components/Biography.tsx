@@ -19,7 +19,7 @@ export default function Biography() {
         transition={{ delay: 0.2 }}
         className="text-lg text-gray-300"
       >
-        Hey there! 👋 I'm driven by a buzzing curiosity 🤔 and often find myself looking at things from a fresh angle, not always sticking to the usual paths. It feels like I've been on a lifelong adventure of learning, soaking up new stuff every day. There's this restless spirit ✨ in me, always chasing answers and trying to connect the dots between things that seem totally unrelated. To me, it's all part of building a unique personal picture!
+        Hey there! 👋 I&apos;m driven by a buzzing curiosity 🤔 and often find myself looking at things from a fresh angle, not always sticking to the usual paths. It feels like I&apos;ve been on a lifelong adventure of learning, soaking up new stuff every day. There&apos;s this restless spirit ✨ in me, always chasing answers and trying to connect the dots between things that seem totally unrelated. To me, it&apos;s all part of building a unique personal picture!
       </motion.p>
 
       <motion.div
@@ -33,7 +33,7 @@ export default function Biography() {
           <li>💻 Technology in Systems</li>
           <li>🚜🌾 Agricultural Engineering from the National University of Colombia</li>
           <li>📈 Specialization in Preparation and Evaluation of Private Projects</li>
-          <li>📋 Master's degree in Project Management</li>
+          <li>📋 Master&apos;s degree in Project Management</li>
           <li>⚖️ Specialist in State Contracting</li>
         </ul>
       </motion.div>

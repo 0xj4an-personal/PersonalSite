@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 export default function About() {
   return (
@@ -15,12 +16,20 @@ export default function About() {
       
       <div className="flex flex-col lg:flex-row items-start">
         <div className="flex-shrink-0 mb-8 lg:mb-0 lg:mr-8">
-          <div className="overflow-hidden rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg w-40 h-40 flex items-center justify-center">
-            <img
+          <div className="overflow-hidden rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 shadow-lg w-40 h-40 flex items-center justify-center relative">
+            <Image
               src="/Assets/Social Media Kit PFP.jpeg"
               alt="Cartoon skull with hat and glasses"
-              className="object-cover w-full h-full rounded-xl border-4 border-gray-700 shadow-xl"
-              onError={(e) => { e.currentTarget.style.display = 'none'; const fallback = e.currentTarget.parentElement && e.currentTarget.parentElement.querySelector('.fallback-initials'); if (fallback) fallback.style.display = 'flex'; }}
+              fill
+              className="object-cover rounded-xl border-4 border-gray-700 shadow-xl"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const fallback = target.parentElement?.querySelector('.fallback-initials');
+                if (fallback instanceof HTMLElement) {
+                  fallback.style.display = 'flex';
+                }
+              }}
             />
             <span className="fallback-initials hidden absolute inset-0 items-center justify-center text-4xl font-bold text-[#4CC9F0]">JJ</span>
           </div>

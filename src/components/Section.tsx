@@ -13,7 +13,7 @@ interface SectionProps {
   color: string;
   scale: number;
   id: string;
-  Component?: React.ComponentType<{}>;
+  Component?: React.ComponentType<object>;
   gradient: string;
   onSectionClick: (section: SectionType) => void;
   isModalOpen: boolean;
@@ -96,5 +96,7 @@ const SectionComponent = forwardRef<THREE.Mesh, SectionProps>(
     );
   }
 );
+
+SectionComponent.displayName = 'Section';
 
 export default SectionComponent; 
