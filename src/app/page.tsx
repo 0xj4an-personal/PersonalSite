@@ -1,103 +1,244 @@
-import Image from "next/image";
+'use client'
+
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, Stars, Text, Html, Sphere } from '@react-three/drei'
+import { motion } from 'framer-motion'
+import { useState, useRef } from 'react'
+import * as THREE from 'three'
+import About from '@/components/About'
+import Experience from '@/components/Experience'
+import Projects from '@/components/Projects'
+import Studies from '@/components/Studies'
+import Biography from '@/components/Biography'
+import Modal from '@/components/Modal'
+import Section from '../components/Section'
+import FloatingElement from '../components/FloatingElement'
+import Comet from '../components/Comet'
+
+export interface Section {
+  name: string
+  position: [number, number, number]
+  color: string
+  scale: number
+  id: string
+  Component?: React.ComponentType<{}>
+  gradient: string
+}
+
+const sections: Section[] = [
+  // Elements along a diagonal path from bottom-left to top-right, more centered
+  {
+    name: '0xj4an',
+    id: 'home',
+    position: [-15, -8, 0], // Moved further out
+    color: '#7B3FF2',
+    scale: 2.5, // Much larger
+    Component: About,
+    gradient: 'from-purple-500 to-blue-500'
+  },
+  {
+    name: 'About Me',
+    id: 'about',
+    position: [-8, -4, 0], // Increased distance from 0xj4an
+    color: '#64ffda',
+    scale: 2.0, // Reduced from previous
+    Component: Biography,
+    gradient: 'from-teal-500 to-emerald-500'
+  },
+  {
+    name: 'Studies',
+    id: 'studies',
+    position: [-2, -1, 0], // Moved slightly left of center
+    color: '#ffd700',
+    scale: 1.5, // Reduced from previous
+    Component: Studies,
+    gradient: 'from-yellow-500 to-amber-500'
+  },
+  {
+    name: 'Experience',
+    id: 'experience',
+    position: [4, 2, 0], // Adjusted spacing
+    color: '#4ade80',
+    scale: 1.2, // Reduced from previous
+    Component: Experience,
+    gradient: 'from-green-500 to-emerald-500'
+  },
+  {
+    name: 'Projects',
+    id: 'projects',
+    position: [9, 4, 0], // Adjusted spacing
+    color: '#ff79c6',
+    scale: 0.9, // Smaller than before
+    Component: Projects,
+    gradient: 'from-pink-500 to-purple-500'
+  }
+]
+
+interface ActiveSection {
+  isOpen: boolean
+  section: Section | null
+}
+
+interface SectionProps {
+  name: string;
+  position: [number, number, number];
+  color: string;
+  scale: number;
+  id: string;
+  Component?: React.ComponentType<{}>;
+  gradient: string;
+  onSectionClick: (section: Section) => void;
+  isModalOpen: boolean;
+}
+
+function Scene({ onSectionClick, isModalOpen }: { onSectionClick: (section: Section) => void, isModalOpen: boolean }) {
+  const floatingElements = [
+    { position: [35, 20, -2] as [number, number, number], rotation: [0.5, 0.5, 0] as [number, number, number], scale: 1.5 },
+    { position: [-35, -20, -2] as [number, number, number], rotation: [-0.3, 0.4, 0.2] as [number, number, number], scale: 2 },
+    { position: [30, -30, -1] as [number, number, number], rotation: [0.2, -0.3, 0.1] as [number, number, number], scale: 1.2 },
+    { position: [-30, 30, -1] as [number, number, number], rotation: [-0.4, 0.2, -0.3] as [number, number, number], scale: 1.8 },
+    { position: [25, 35, -3] as [number, number, number], rotation: [0.3, -0.5, 0.4] as [number, number, number], scale: 1.3 },
+    { position: [-25, -35, -3] as [number, number, number], rotation: [-0.2, 0.3, -0.1] as [number, number, number], scale: 1.6 },
+    { position: [40, 0, -4] as [number, number, number], rotation: [0.1, 0.2, 0.3] as [number, number, number], scale: 2.2 },
+    { position: [-40, 0, -4] as [number, number, number], rotation: [-0.1, -0.2, -0.3] as [number, number, number], scale: 2.4 },
+    { position: [0, 40, -4] as [number, number, number], rotation: [0.4, -0.1, 0.2] as [number, number, number], scale: 1.9 },
+    { position: [0, -40, -4] as [number, number, number], rotation: [-0.4, 0.1, -0.2] as [number, number, number], scale: 1.7 },
+  ]
+
+  // Define comet properties
+  const comets = [
+    { position: [-30, -20, -5] as [number, number, number], velocity: [0.5, 0.3, 0.1] as [number, number, number], size: 0.15, color: '#ffe066' },
+    { position: [20, 10, -8] as [number, number, number], velocity: [-0.4, -0.2, -0.3] as [number, number, number], size: 0.1, color: '#a9e34b' },
+    { position: [-10, 30, 5] as [number, number, number], velocity: [0.2, -0.5, 0.2] as [number, number, number], size: 0.2, color: '#4dd0e1' },
+    { position: [15, -25, 10] as [number, number, number], velocity: [-0.3, 0.4, -0.1] as [number, number, number], size: 0.12, color: '#f06292' },
+    { position: [-5, 5, -15] as [number, number, number], velocity: [0.4, 0.1, 0.5] as [number, number, number], size: 0.18, color: '#bdbdbd' },
+  ];
+
+  const zeroXj4anRef = useRef<THREE.Group>(null); // Ref for the 0xj4an element
+
+  useFrame((state, delta) => {
+    // Test animation for 0xj4an element
+    if (zeroXj4anRef.current) {
+      zeroXj4anRef.current.rotation.y += delta * 0.5; // Rotate slowly
+    }
+  });
+
+  return (
+    <>
+      <Stars radius={100} depth={50} count={7000} factor={4} saturation={0} fade speed={1} />
+      <ambientLight intensity={0.15} />
+      <pointLight position={[10, 10, 10]} intensity={0.4} />
+      <pointLight position={[-10, -10, -10]} intensity={0.2} />
+      <fog attach="fog" args={['#000', 20, 40]} />
+      
+      {/* Add floating elements */}
+      {floatingElements.map((element, index) => (
+        <FloatingElement key={index} {...element} />
+      ))}
+
+      {/* Add comets */}
+      {comets.map((comet, index) => (
+        <Comet key={index} {...comet} />
+      ))}
+
+      {sections.map((section, i) => (
+        <Section 
+          key={section.name} 
+          {...section} 
+          onSectionClick={onSectionClick} 
+          isModalOpen={isModalOpen} 
+          gradient={section.gradient} 
+          ref={section.id === 'home' ? zeroXj4anRef : undefined} // Attach ref to 0xj4an
+        />
+      ))}
+      
+      {/* Draw lines between consecutive elements */}
+      {sections.slice(0, -1).map((section, i) => {
+        const target = sections[i + 1];
+        if (!target) return null;
+
+        return (
+          <line key={`${section.id}-${target.id}`}>
+            <bufferGeometry
+              attach="geometry"
+              attributes={{
+                position: new THREE.BufferAttribute(
+                  new Float32Array([
+                    ...section.position,
+                    ...target.position,
+                  ]),
+                  3
+                ),
+              }}
+            />
+            <lineBasicMaterial 
+              attach="material" 
+              color={'#ffffff'} 
+              opacity={isModalOpen ? 0.03 : 0.08} 
+              transparent 
+              linewidth={1}
+            />
+          </line>
+        );
+      })}
+    </>
+  )
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [activeSection, setActiveSection] = useState<{ isOpen: boolean; section: Section | null }>({
+    isOpen: false,
+    section: null,
+  })
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSectionClick = (section: Section) => {
+    if (!section.Component) return // Don't open modal for knowledge elements
+    setActiveSection({ isOpen: true, section })
+  }
+
+  return (
+    <>
+      <div className="relative h-screen w-full bg-black">
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-10">
+          <h1 className={`text-4xl font-bold text-white tracking-wider ${activeSection.isOpen ? 'opacity-50' : ''}`}>
+            0xj4an
+          </h1>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <Canvas
+          camera={{ position: [0, 0, 35], fov: 45 }} // Moved camera back for better view
+          className="absolute inset-0"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+          <OrbitControls 
+            enableZoom={true} 
+            enablePan={true} 
+            enableRotate={true}
+            minDistance={20} // Increased minimum zoom
+            maxDistance={50} // Increased maximum zoom
+            autoRotate={false}
+            enableDamping
+            dampingFactor={0.05}
+            target={[0, 0, 0]} // Center point
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+          <Scene onSectionClick={handleSectionClick} isModalOpen={activeSection.isOpen} />
+        </Canvas>
+
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-white transition-opacity duration-300 ${activeSection.isOpen ? 'opacity-0' : 'opacity-100'}`}>
+          <p className="mb-2 text-lg">🖱️ Click and drag to explore the path</p>
+          <p className="text-lg">🚀 Click on any element to view details</p>
+        </div>
+
+        {activeSection.section?.Component && (
+          <Modal 
+            isOpen={activeSection.isOpen}
+            onClose={() => setActiveSection({ isOpen: false, section: null })}
+            color={activeSection.section.color}
+            gradient={activeSection.section.gradient}
+          >
+            <activeSection.section.Component />
+          </Modal>
+        )}
+      </div>
+    </>
+  )
 }
